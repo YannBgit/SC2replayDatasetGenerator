@@ -1,6 +1,6 @@
 import csv
 import sc2reader
-from sc2reader.events import PlayerStatsEvent
+from sc2reader.events import PlayerStatsEvent, PlayerLeaveEvent
 from os import path, listdir
 
 
@@ -14,6 +14,9 @@ def race_to_id(raceName):
     elif raceName == "Protoss":
         return 2
 
+def frame_to_realtime(frame):
+    return round(frame / 22.4)
+
 indir = "replays"
 outdir = "csvOutput"
 
@@ -23,10 +26,10 @@ with open(outdir + "/replaysDataset.csv", "w", newline = "") as csv_file:
     writer.writerow(["time", "race1", "race2", "supply1", "supply2", "income1", "income2", "workers1", "workers2", "army1", "army2", "technology1", "technology2", "floatingResources1", "floatingResources2", "lostResources1", "lostResources2", "winnerNumber"])
 
     for filename in [f for f in listdir(indir) if f.endswith(".SC2Replay")]:
-        print("Extracting", filename, "...")
+        print("Extracting from", filename, "...")
         replay = sc2reader.load_replay(path.join(indir, filename))
 
-        time = 0
+        frame = 0
         race1 = race_to_id(replay.players[0].play_race)
         race2 = race_to_id(replay.players[1].play_race)
         supply1 = 0
@@ -46,10 +49,10 @@ with open(outdir + "/replaysDataset.csv", "w", newline = "") as csv_file:
 
         for player in replay.players:
             if player.result == "Win":
-                winnerNumber = player.pid
+                winnerNumber = player.pid - 1
         
-        last_measurement_time = 0
-        interval = 30
+        last_measurement_frame = 0
+        frame_interval = 600
 
         for event in replay.events:
             if isinstance(event, PlayerStatsEvent):
@@ -71,8 +74,12 @@ with open(outdir + "/replaysDataset.csv", "w", newline = "") as csv_file:
                     floatingResources2 = event.minerals_current + event.vespene_current
                     lostResources2 = event.resources_lost
                 
-                time = event.second
+                frame = event.frame
 
-            if time >= (last_measurement_time + interval):
+            elif isinstance(event, PlayerLeaveEvent):
+                break
+
+            if frame >= (last_measurement_frame + frame_interval):
+                time = frame_to_realtime(frame)
                 writer.writerow([time, race1, race2, supply1, supply2, income1, income2, workers1, workers2, army1, army2, technology1, technology2, floatingResources1, floatingResources2, lostResources1, lostResources2, winnerNumber])
-                last_measurement_time = event.second
+                last_measurement_frame = frame
