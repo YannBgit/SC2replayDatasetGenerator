@@ -27,7 +27,7 @@ def generate_dataset(indir, outfile):
             print("Extracting from", filename, "...")
             replay = sc2reader.load_replay(path.join(indir, filename))
 
-            if (len(replay.players)) == 2 and (replay.frames > 1344):
+            if (len(replay.players) == 2) and (replay.frames > 1344) and (replay.date.year >= 2022):
                 frame = 0
                 race1 = race_to_id(replay.players[0].play_race)
                 race2 = race_to_id(replay.players[1].play_race)
@@ -63,8 +63,6 @@ def generate_dataset(indir, outfile):
                 
                 last_measurement_frame = 0
                 frame_interval = 112
-
-                # FIX LE DELAI DE J2
 
                 for event in replay.events:
                     if isinstance(event, PlayerStatsEvent):
