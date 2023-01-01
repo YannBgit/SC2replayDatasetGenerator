@@ -27,8 +27,14 @@ def generate_dataset(indir, outfile):
         writer.writerow(["time", "race1", "race2", "supplyUsed1", "supplyUsed2", "supplyMade1", "supplyMade2", "totalIncome1", "totalIncome2", "mineralsIncome1", "mineralsIncome2", "vespeneIncome1", "vespeneIncome2", "totalResources1", "totalResources2", "minerals1", "minerals2", "vespene1", "vespene2", "activeWorkers1", "activeWorkers2", "army1", "army2", "technology1", "technology2", "lostResources1", "lostResources2", "winner"])
 
         for filename in [f for f in listdir(indir) if f.endswith(".SC2Replay")]:
-            print("Extracting from", filename, "...")
-            replay = sc2reader.load_replay(path.join(indir, filename))
+            print("Extraction de", filename, "...")
+
+            try:
+                replay = sc2reader.load_replay(path.join(indir, filename))
+            
+            except Exception:
+                print("Erreur de chargement du replay : replay ignoré")
+                continue
 
             if (len(replay.players) == 2) and (replay.frames > 1344) and (replay.expansion == "LotV"):
                 frame = 0
@@ -111,6 +117,10 @@ def generate_dataset(indir, outfile):
 
                     elif isinstance(event, PlayerLeaveEvent):
                         break
+                
+                else:
+                    print("Le replay n'est pas un 1v1, dure moins d'une minute ou n'est pas sous l'expension Legacy of the Void : replay ignoré")
+                    continue
 
 generate_dataset("replays/trainSet", "generatedDatasets/trainSet.csv")
 generate_dataset("replays/testSet", "generatedDatasets/testSet.csv")
