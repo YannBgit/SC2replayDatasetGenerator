@@ -14,6 +14,9 @@ def race_to_id(raceName):
     elif raceName == "Protoss":
         return 2
 
+    else:
+        return -1
+
 def frame_to_realtime(frame):
     return round(frame / 22.4)
 
@@ -27,10 +30,15 @@ def generate_dataset(indir, outfile):
             print("Extracting from", filename, "...")
             replay = sc2reader.load_replay(path.join(indir, filename))
 
-            if (len(replay.players) == 2) and (replay.frames > 1344) and (replay.date.year >= 2020):
+            if (len(replay.players) == 2) and (replay.frames > 1344) and (replay.expansion == "LotV"):
                 frame = 0
+
                 race1 = race_to_id(replay.players[0].play_race)
                 race2 = race_to_id(replay.players[1].play_race)
+
+                if (race1 == -1) or (race2 == -1):
+                    print("Races invalides : replay ignoré")
+                    continue
 
                 supplyUsed1 = 0
                 supplyUsed2 = 0
@@ -62,7 +70,7 @@ def generate_dataset(indir, outfile):
                         winner = player.pid - 1
                 
                 last_measurement_frame = 0
-                frame_interval = 112
+                frame_interval = 10
 
                 for event in replay.events:
                     if isinstance(event, PlayerStatsEvent):
