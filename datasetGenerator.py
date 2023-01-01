@@ -27,7 +27,7 @@ def generate_dataset(indir, outfile):
             print("Extracting from", filename, "...")
             replay = sc2reader.load_replay(path.join(indir, filename))
 
-            if (len(replay.players) == 2) and (replay.frames > 1344) and (replay.date.year >= 2022):
+            if (len(replay.players) == 2) and (replay.frames > 1344) and (replay.date.year >= 2020):
                 frame = 0
                 race1 = race_to_id(replay.players[0].play_race)
                 race2 = race_to_id(replay.players[1].play_race)
