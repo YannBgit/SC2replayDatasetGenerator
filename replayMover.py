@@ -1,8 +1,8 @@
 import os, random, shutil
 
-source = "replays"
-destTrain = "trainSet"
-destTest = "testSet"
+source = "replays/replayBank"
+destTrain = "replays/trainSet"
+destTest = "replays/testSet"
 nbTrain = int(input("Nombre de fichiers pour le train set : "))
 nbTest = int(input("Nombre de fichiers pour le test set : "))
 
