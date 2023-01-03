@@ -1,21 +1,12 @@
 import os, random, shutil
 
-source = "replays/replayBank"
-destTrain = "replays/trainSet"
-destTest = "replays/testSet"
-nbTrain = int(input("Nombre de fichiers pour le train set : "))
-nbTest = int(input("Nombre de fichiers pour le test set : "))
+source = "replays"
+dest = "replayBank"
+nb = int(input("Nombre de fichiers à donner au parseur : "))
 
-print("Déplacement des replays du train set...")
+print("Déplacement des replays...")
 
-for i in range(nbTrain):
+for i in range(nb):
     rdmFile = random.choice(os.listdir(source))
     srcFile = "%s/%s"%(source, rdmFile)
-    shutil.move(srcFile, destTrain)
-
-print("Déplacement des replays du test set...")
-
-for i in range(nbTest):
-    rdmFile = random.choice(os.listdir(source))
-    srcFile = "%s/%s"%(source, rdmFile)
-    shutil.move(srcFile, destTest)
+    shutil.move(srcFile, dest)

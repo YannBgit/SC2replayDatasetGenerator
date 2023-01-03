@@ -79,6 +79,7 @@ def generate_dataset(indir, outfile):
                 frame_interval = 10
 
                 for event in replay.events:
+                    print(dir(event))
                     if isinstance(event, PlayerStatsEvent):
                         if event.pid == 1:
                             supplyUsed1 = event.food_used
@@ -122,5 +123,4 @@ def generate_dataset(indir, outfile):
                     print("Le replay n'est pas un 1v1, dure moins d'une minute ou n'est pas sous l'expension Legacy of the Void : replay ignoré")
                     continue
 
-generate_dataset("replays/trainSet", "generatedDatasets/trainSet.csv")
-generate_dataset("replays/testSet", "generatedDatasets/testSet.csv")
+generate_dataset("replayBank", "generatedDatasets/dataset.csv")
