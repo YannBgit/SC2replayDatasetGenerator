@@ -22,13 +22,13 @@ def frame_to_realtime(frame):
 
 def generate_dataset(indir, outfile):
     with open(outfile, "w", newline = "") as csv_file:
-    
+        
+        print("Démarrage de l'extraction, n'éteignez pas votre PC...")
+
         writer = csv.writer(csv_file)
         writer.writerow(["time", "race1", "race2", "supplyUsed1", "supplyUsed2", "supplyMade1", "supplyMade2", "totalIncome1", "totalIncome2", "mineralsIncome1", "mineralsIncome2", "vespeneIncome1", "vespeneIncome2", "totalResources1", "totalResources2", "minerals1", "minerals2", "vespene1", "vespene2", "activeWorkers1", "activeWorkers2", "army1", "army2", "technology1", "technology2", "lostResources1", "lostResources2", "winner"])
 
         for filename in [f for f in listdir(indir) if f.endswith(".SC2Replay")]:
-            print("Extraction de", filename, "...")
-
             try:
                 replay = sc2reader.load_replay(path.join(indir, filename))
             
@@ -79,7 +79,6 @@ def generate_dataset(indir, outfile):
                 frame_interval = 10
 
                 for event in replay.events:
-                    print(dir(event))
                     if isinstance(event, PlayerStatsEvent):
                         if event.pid == 1:
                             supplyUsed1 = event.food_used
