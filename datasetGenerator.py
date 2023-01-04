@@ -17,6 +17,16 @@ def race_to_id(raceName):
     else:
         return -1
 
+mapNames = []
+
+def map_to_id(mapName):
+    if mapName in mapNames:
+        return mapNames.index(mapName)
+    
+    else:
+        mapNames.append(mapName)
+        return mapNames.index(mapName)
+
 def frame_to_realtime(frame):
     return round(frame / 22.4)
 
@@ -26,7 +36,7 @@ def generate_dataset(indir, outfile):
         print("Démarrage de l'extraction, n'éteignez pas votre PC...")
 
         writer = csv.writer(csv_file)
-        writer.writerow(["time", "race1", "race2", "supplyUsed1", "supplyUsed2", "supplyMade1", "supplyMade2", "totalIncome1", "totalIncome2", "mineralsIncome1", "mineralsIncome2", "vespeneIncome1", "vespeneIncome2", "totalResources1", "totalResources2", "minerals1", "minerals2", "vespene1", "vespene2", "activeWorkers1", "activeWorkers2", "army1", "army2", "technology1", "technology2", "lostResources1", "lostResources2", "winner"])
+        writer.writerow(["time", "race1", "race2", "map", "supplyUsed1", "supplyUsed2", "totalIncome1", "totalIncome2", "mineralsIncome1", "mineralsIncome2", "vespeneIncome1", "vespeneIncome2", "totalResources1", "totalResources2", "minerals1", "minerals2", "vespene1", "vespene2", "activeWorkers1", "activeWorkers2", "army1", "army2", "technology1", "technology2", "lostResources1", "lostResources2", "winner"])
 
         for filename in [f for f in listdir(indir) if f.endswith(".SC2Replay")]:
             try:
@@ -46,10 +56,10 @@ def generate_dataset(indir, outfile):
                     print("Races invalides : replay ignoré")
                     continue
 
+                map = map_to_id(replay.map_name)
+
                 supplyUsed1 = 0
                 supplyUsed2 = 0
-                supplyMade1 = 0
-                supplyMade2 = 0
                 totalIncome1 = 0
                 totalIncome2 = 0
                 mineralsIncome1 = 0
@@ -82,7 +92,6 @@ def generate_dataset(indir, outfile):
                     if isinstance(event, PlayerStatsEvent):
                         if event.pid == 1:
                             supplyUsed1 = event.food_used
-                            supplyMade1 = event.food_made
                             totalIncome1 = event.minerals_collection_rate + event.vespene_collection_rate
                             mineralsIncome1 = event.minerals_collection_rate
                             vespeneIncome1 = event.vespene_collection_rate
@@ -96,7 +105,6 @@ def generate_dataset(indir, outfile):
 
                         elif event.pid == 2:
                             supplyUsed2 = event.food_used
-                            supplyMade2 = event.food_made
                             totalIncome2 = event.minerals_collection_rate + event.vespene_collection_rate
                             mineralsIncome2 = event.minerals_collection_rate
                             vespeneIncome2 = event.vespene_collection_rate
@@ -110,7 +118,7 @@ def generate_dataset(indir, outfile):
 
                             if frame >= (last_measurement_frame + frame_interval):
                                 time = frame_to_realtime(frame)
-                                writer.writerow([time, race1, race2, supplyUsed1, supplyUsed2, supplyMade1, supplyMade2, totalIncome1, totalIncome2, mineralsIncome1, mineralsIncome2, vespeneIncome1, vespeneIncome2, totalResources1, totalResources2, minerals1, minerals2, vespene1, vespene2, activeWorkers1, activeWorkers2, army1, army2, technology1, technology2, lostResources1, lostResources2, winner])
+                                writer.writerow([time, race1, race2, map, supplyUsed1, supplyUsed2, totalIncome1, totalIncome2, mineralsIncome1, mineralsIncome2, vespeneIncome1, vespeneIncome2, totalResources1, totalResources2, minerals1, minerals2, vespene1, vespene2, activeWorkers1, activeWorkers2, army1, army2, technology1, technology2, lostResources1, lostResources2, winner])
                                 last_measurement_frame = frame
                         
                         frame = event.frame
