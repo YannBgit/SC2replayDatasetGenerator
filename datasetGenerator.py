@@ -133,7 +133,9 @@ def generateDataset(indir, outfile):
                     print("Le replay n'est pas un 1v1, dure moins d'une minute ou n'est pas sous l'expension Legacy of the Void : replay ignoré")
                     continue
 
-def randomizeAndSplitDataset(datasetPercent, dataset, testDataset):
+def randomizeAndSplitDataset(testDatasetPercent, dataset, testDataset):
+    print("\nGénération des datasets randomisés finaux : shuffledDataset.csv et testDataset.csv")
+
     shuffledDataset = "generatedDatasets/shuffledDataset.csv"
     
     fid = open(dataset, "r")
@@ -160,7 +162,7 @@ def randomizeAndSplitDataset(datasetPercent, dataset, testDataset):
         csvWriter.writerow(header)
 
         for i, row in enumerate(allRows):
-            if rowsCopied < (datasetPercent * len(dataset)):
+            if rowsCopied < (testDatasetPercent * len(allRows)):
                 csvWriter.writerow(row)
                 rowsToDelete.append(i)
                 rowsCopied += 1
@@ -173,7 +175,7 @@ def randomizeAndSplitDataset(datasetPercent, dataset, testDataset):
             if i not in rowsToDelete:
                 csvWriter.writerow(row)
 
-fullDatasetPercent = 0.8
+testDatasetPercent = nbFiles = int(input("Nombre de fichiers à donner au parseur (entre 0.0 et 1.0) : "))
 
 generateDataset("replayBank", "generatedDatasets/dataset.csv")
-randomizeAndSplitDataset(fullDatasetPercent, "generatedDatasets/dataset.csv", "generatedDatasets/testDataset.csv")
+randomizeAndSplitDataset(testDatasetPercent, "generatedDatasets/dataset.csv", "generatedDatasets/testDataset.csv")
