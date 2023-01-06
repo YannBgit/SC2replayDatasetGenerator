@@ -175,7 +175,7 @@ def randomizeAndSplitDataset(testDatasetPercent, dataset, testDataset):
             if i not in rowsToDelete:
                 csvWriter.writerow(row)
 
-testDatasetPercent = nbFiles = int(input("Nombre de fichiers à donner au parseur (entre 0.0 et 1.0) : "))
+testDatasetPercent = float(input("Proportion de rows à garder pour le test set (entre 0.0 et 1.0) : "))
 
 generateDataset("replayBank", "generatedDatasets/dataset.csv")
 randomizeAndSplitDataset(testDatasetPercent, "generatedDatasets/dataset.csv", "generatedDatasets/testDataset.csv")
