@@ -4,9 +4,9 @@ Outil de génération de datasets pour entraîner des réseaux de neurones à pa
 Ce programme nécessite d'avoir installé python 3 et sc2reader.
 
 Utilisation :
-- Copier les replays à parser dans le répertoire "replayBank", pour cela le script de déplacement de fichiers de masse peut être utile.
-  Il prend en entrée un répertoire nommé "replays" et déplace le nombre désiré (demandé par le programme) vers "replayBank"
+- Copier les replays à parser dans le répertoire "replays"
+  Le script de déplacement de fichiers prend en entrée le répertoire "replays" et déplace le nombre désiré de replays vers "replayBank".
 	python3 replayMover.py
 - Exécuter le parseur :
 	python3 datasetGenerator.py
-- Le dataset généré se situe dans le répertoire generatedDatasets au format csv
+- Les datasets générés se situent dans le répertoire generatedDatasets au format csv.

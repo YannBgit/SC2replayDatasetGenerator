@@ -1,10 +1,14 @@
 import csv
+import random
 import sc2reader
 from sc2reader.events import PlayerStatsEvent, PlayerLeaveEvent
+import os
 from os import path, listdir
 
 
-def race_to_id(raceName):
+header = ["time", "race1", "race2", "map", "supplyUsed1", "supplyUsed2", "totalIncome1", "totalIncome2", "mineralsIncome1", "mineralsIncome2", "vespeneIncome1", "vespeneIncome2", "totalResources1", "totalResources2", "minerals1", "minerals2", "vespene1", "vespene2", "activeWorkers1", "activeWorkers2", "army1", "army2", "technology1", "technology2", "lostResources1", "lostResources2", "winner"]
+
+def raceToId(raceName):
     if raceName == "Terran":
         return 0
     
@@ -19,7 +23,7 @@ def race_to_id(raceName):
 
 mapNames = []
 
-def map_to_id(mapName):
+def mapToId(mapName):
     if mapName in mapNames:
         return mapNames.index(mapName)
     
@@ -27,16 +31,15 @@ def map_to_id(mapName):
         mapNames.append(mapName)
         return mapNames.index(mapName)
 
-def frame_to_realtime(frame):
+def frameToRealtime(frame):
     return round(frame / 22.4)
 
-def generate_dataset(indir, outfile):
-    with open(outfile, "w", newline = "") as csv_file:
-        
+def generateDataset(indir, outfile):
+    with open(outfile, "w", newline = "") as csvFile:
         print("Démarrage de l'extraction, n'éteignez pas votre PC...")
 
-        writer = csv.writer(csv_file)
-        writer.writerow(["time", "race1", "race2", "map", "supplyUsed1", "supplyUsed2", "totalIncome1", "totalIncome2", "mineralsIncome1", "mineralsIncome2", "vespeneIncome1", "vespeneIncome2", "totalResources1", "totalResources2", "minerals1", "minerals2", "vespene1", "vespene2", "activeWorkers1", "activeWorkers2", "army1", "army2", "technology1", "technology2", "lostResources1", "lostResources2", "winner"])
+        writer = csv.writer(csvFile)
+        writer.writerow(header)
 
         for filename in [f for f in listdir(indir) if f.endswith(".SC2Replay")]:
             try:
@@ -49,14 +52,14 @@ def generate_dataset(indir, outfile):
             if (len(replay.players) == 2) and (replay.frames > 1344) and (replay.expansion == "LotV"):
                 frame = 0
 
-                race1 = race_to_id(replay.players[0].play_race)
-                race2 = race_to_id(replay.players[1].play_race)
+                race1 = raceToId(replay.players[0].play_race)
+                race2 = raceToId(replay.players[1].play_race)
 
                 if (race1 == -1) or (race2 == -1):
                     print("Races invalides : replay ignoré")
                     continue
 
-                map = map_to_id(replay.map_name)
+                map = mapToId(replay.map_name)
 
                 supplyUsed1 = 0
                 supplyUsed2 = 0
@@ -85,8 +88,8 @@ def generate_dataset(indir, outfile):
                     if player.result == "Win":
                         winner = player.pid - 1
                 
-                last_measurement_frame = 0
-                frame_interval = 10
+                lastMeasurementTime = 0
+                frameInterval = 10
 
                 for event in replay.events:
                     if isinstance(event, PlayerStatsEvent):
@@ -116,10 +119,10 @@ def generate_dataset(indir, outfile):
                             technology2 = event.minerals_used_current_technology + event.vespene_used_current_technology
                             lostResources2 = event.resources_lost
 
-                            if frame >= (last_measurement_frame + frame_interval):
-                                time = frame_to_realtime(frame)
+                            if frame >= (lastMeasurementTime + frameInterval):
+                                time = frameToRealtime(frame)
                                 writer.writerow([time, race1, race2, map, supplyUsed1, supplyUsed2, totalIncome1, totalIncome2, mineralsIncome1, mineralsIncome2, vespeneIncome1, vespeneIncome2, totalResources1, totalResources2, minerals1, minerals2, vespene1, vespene2, activeWorkers1, activeWorkers2, army1, army2, technology1, technology2, lostResources1, lostResources2, winner])
-                                last_measurement_frame = frame
+                                lastMeasurementTime = frame
                         
                         frame = event.frame
 
@@ -130,4 +133,47 @@ def generate_dataset(indir, outfile):
                     print("Le replay n'est pas un 1v1, dure moins d'une minute ou n'est pas sous l'expension Legacy of the Void : replay ignoré")
                     continue
 
-generate_dataset("replayBank", "generatedDatasets/dataset.csv")
+def randomizeAndSplitDataset(datasetPercent, dataset, testDataset):
+    shuffledDataset = "generatedDatasets/shuffledDataset.csv"
+    
+    fid = open(dataset, "r")
+    li = fid.readlines()[1:]
+    fid.close()
+
+    random.shuffle(li)
+
+    fid = open(shuffledDataset, "w")
+    fid.writelines(li)
+    fid.close()
+
+    os.remove(dataset)
+
+    rowsCopied = 0
+    rowsToDelete = []
+
+    with open(shuffledDataset, "r") as shuffled:
+        csvReader = csv.reader(shuffled)
+        allRows = list(csvReader)
+
+    with open(testDataset, "w", newline = "") as test:
+        csvWriter = csv.writer(test)
+        csvWriter.writerow(header)
+
+        for i, row in enumerate(allRows):
+            if rowsCopied < (datasetPercent * len(dataset)):
+                csvWriter.writerow(row)
+                rowsToDelete.append(i)
+                rowsCopied += 1
+
+    with open(shuffledDataset, "w", newline = "") as shuffled:
+        csvWriter = csv.writer(shuffled)
+        csvWriter.writerow(header)
+
+        for i, row in enumerate(allRows):
+            if i not in rowsToDelete:
+                csvWriter.writerow(row)
+
+fullDatasetPercent = 0.8
+
+generateDataset("replayBank", "generatedDatasets/dataset.csv")
+randomizeAndSplitDataset(fullDatasetPercent, "generatedDatasets/dataset.csv", "generatedDatasets/testDataset.csv")
