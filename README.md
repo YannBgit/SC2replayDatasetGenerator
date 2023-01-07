@@ -14,3 +14,4 @@ Utilisation :
 	ou
 	py datasetGenerator.py
 - Les datasets générés se situent dans le répertoire generatedDatasets au format csv.
+- Pour désactiver la réorganisation et la séparation des datasets, commenter (#) la fonction concernée.
